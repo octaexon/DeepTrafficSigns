@@ -1,7 +1,9 @@
 .DS_store
 *.ipynb
+.ipynb_checkpoints/
 __pycache__/
 
+*metadata.csv
 *.pbtxt
 *.tfrecord
 

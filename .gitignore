@@ -1,0 +1,11 @@
+.DS_store
+*.ipynb
+__pycache__/
+
+*.pbtxt
+*.tfrecord
+
+aux_sign_data/
+images_ppm/
+images_jpg/
+pretrained_gzips/

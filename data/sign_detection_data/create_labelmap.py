@@ -28,14 +28,9 @@ CLASS_CSV = os.path.join(SCRIPT_DIR, 'metadata/class_metadata.csv')
 IMAGE_CSV = os.path.join(SCRIPT_DIR, 'metadata/image_metadata.csv')
 DST_DIR = os.path.join(SCRIPT_DIR, 'metadata')
 
-#LABEL_MAP_FILENAME_ALL = 'all_label_map.pbtxt'
 LABEL_MAP_FILENAME_TEMPLATE = 'top_{top}_label_map.pbtxt'
 
-#LABEL_MAP_TEMPLATE = 'item {{\n    id: {id}\n    name: "{description}"\n}}\n\n'
-LABEL_MAP_TEMPLATE = ('item {{\n    id: {label}\n    '
-                      + 'name: "{description}"\n    '
-                      + 'original_id: {class_id}\n    '
-                      + 'category: "{category}"\n}}')
+LABEL_MAP_TEMPLATE = 'item {{\n    id: {label}\n    name: \'{description}\'\n}}\n\n'
 
 
 def metadata2labelmap(metadata):

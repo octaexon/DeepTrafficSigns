@@ -1,0 +1,14 @@
+{
+    "PATHS": {
+        "PATH_TO_TEMPLATE_CONFIG": "./template_ssd_mobilenet_v1.config",
+        "PATH_TO_MODEL_CHECKPOINT": "./ssd_mobilenet_v1_coco_2017_11_17/model.ckpt",
+        "PATH_TO_TRAIN_TFRECORD": "../../data/sign_detection_data/metadata/top_{top}_train.tfrecord",
+        "PATH_TO_EVAL_TFRECORD": "../../data/sign_detection_data/metadata/top_{top}_eval.tfrecord",
+        "PATH_TO_LABEL_MAP": "../../data/sign_detection_data/metadata/top_{top}_label_map.pbtxt",
+        "PATH_TO_PIPELINE_CONFIG": "./top_{top}_ssd_mobilenet_v1.config"
+    },
+    "SIZES": {
+        "NUM_CLASSES": "{top}",
+        "NUM_EXAMPLES": "{examples}"
+    }
+}

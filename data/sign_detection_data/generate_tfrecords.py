@@ -105,8 +105,8 @@ def tf_example_generator(metadata):
             encoded_data = fd.read()
 
         # preprocess image and bboxes metadata
-        encoded_filename = bytes(filename, 'utf-8')
-        encoded_format = b'jpeg' 
+        encoded_filename = bytes(os.path.realpath(filename), 'utf-8')
+        encoded_format = b'jpg' 
 
         # rescale bounding box coordinates to [0, 1]
         xmins = (bbox_metadata.xmin / width).tolist()
@@ -131,9 +131,9 @@ def tf_example_generator(metadata):
                                 'image/object/bbox/xmax': _float_feature(xmaxs),
                                 'image/object/bbox/ymin': _float_feature(ymins),
                                 'image/object/bbox/ymax': _float_feature(ymaxs),
-                                'image/object/bbox/class/label': _int64_feature(class_labels),
-                                'image/object/bbox/class/text': _byte_feature(class_texts),
-                                    }
+                                'image/object/class/label': _int64_feature(class_labels),
+                                'image/object/class/text': _byte_feature(class_texts)
+                                }
                             )
                         )
 

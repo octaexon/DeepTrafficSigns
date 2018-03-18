@@ -92,7 +92,7 @@ fi
 
 while read line; do
     # extract various fields into variables from each line
-    read image_file xmin ymax xmax ymin class_id << EXTRACT
+    read image_file xmin ymin xmax ymax class_id << EXTRACT
     $(echo $line | awk 'BEGIN { FS=";"; OFS=" " } { print $1,$2,$3,$4,$5,$6 }')
 EXTRACT
     # path of image file and change its extension

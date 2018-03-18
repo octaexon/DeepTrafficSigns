@@ -18,7 +18,7 @@ __email__ = 'octaexon@gmail.com'
 __status__ = 'Development'
 
 
-import metadata_utilities as utils
+import utilities.metadata_utilities as metautils
 
 
 # defaults for input and output paths
@@ -160,16 +160,16 @@ def process_metadata(class_metadata_path, image_metadata_path, dst_dir, top, tra
         train_frac: float
             fraction of samples to be used for training
     '''
-    metadata = utils.load_metadata(class_metadata_path, image_metadata_path)
+    metadata = metautils.load_metadata(class_metadata_path, image_metadata_path)
 
-    metadata = utils.add_labels(metadata)
+    metadata = metautils.add_labels(metadata)
 
-    top, metadata = utils.get_top_metadata(top, metadata)
+    top, metadata = metautils.get_top_metadata(top, metadata)
 
     train_metadata, eval_metadata = _train_eval_split(metadata, train_frac)
 
-    train_record_path = utils.create_output_path(dst_dir, TRAIN_TFRECORD_TEMPLATE, top=top)
-    eval_record_path = utils.create_output_path(dst_dir, EVAL_TFRECORD_TEMPLATE, top=top)
+    train_record_path = metautils.create_output_path(dst_dir, TRAIN_TFRECORD_TEMPLATE, top=top)
+    eval_record_path = metautils.create_output_path(dst_dir, EVAL_TFRECORD_TEMPLATE, top=top)
 
     # construct and write training record
     with tf.python_io.TFRecordWriter(train_record_path) as writer:
@@ -191,7 +191,7 @@ if __name__ == '__main__':
             help='Input csv file containing image metadata')
     parser.add_argument('-d', '--destination-directory', dest='dst_dir', type=str, default=DST_DIR,
             help='Destination directory for tfrecords')
-    parser.add_argument('-t', '--top', dest='top', default=False, type=utils.positive_int,
+    parser.add_argument('-t', '--top', dest='top', default=False, type=metautils.positive_int,
             help='-t 5 means top 5 labels in terms of frequency should be included in tfrecords')
     parser.add_argument('-f', '--train-frac', dest='train_frac', type=str, default=TRAIN_FRAC,
             help='train-evaluation split fraction for samples')

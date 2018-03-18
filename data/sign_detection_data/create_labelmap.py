@@ -19,7 +19,7 @@ __email__ = 'octaexon@gmail.com'
 __status__ = 'Development'
 
 
-import metadata_utilities as utils
+import utilities.metadata_utilities as metautils
 
 
 #SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -91,13 +91,13 @@ def process_metadata(class_metadata_path, image_metadata_path, dst_dir, top):
             to select
             False to indicate that all classes should be selected
     '''
-    metadata = utils.load_metadata(class_metadata_path, image_metadata_path)
+    metadata = metautils.load_metadata(class_metadata_path, image_metadata_path)
 
-    metadata = utils.add_labels(metadata)
+    metadata = metautils.add_labels(metadata)
 
-    top, metadata = utils.get_top_metadata(top, metadata)
+    top, metadata = metautils.get_top_metadata(top, metadata)
  
-    label_map_path = utils.create_output_path(dst_dir, LABEL_MAP_FILENAME_TEMPLATE, top=top)
+    label_map_path = metautils.create_output_path(dst_dir, LABEL_MAP_FILENAME_TEMPLATE, top=top)
 
     with open(label_map_path, 'w') as fd:
         # create label map parameters
@@ -127,7 +127,7 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--top', 
                         dest='top', 
                         default=False, 
-                        type=utils.positive_int,
+                        type=metautils.positive_int,
                         help='-t 5 means top 5 labels in terms of frequency \
                               should be included in label map')
 

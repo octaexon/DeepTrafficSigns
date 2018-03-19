@@ -10,7 +10,6 @@ top*.config
 
 snippets/
 aux_sign_data/
-images_ppm/
-images_jpg/
+images/
 pretrained_gzips/
 ssd_mobilenet_v1_coco_2017_11_17/

@@ -20,17 +20,14 @@ __status__ = 'Development'
 
 
 import utilities.metadata_utilities as metautils
+import utilities.parser_utilities as parserutils
 
 
-#SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
-SCRIPT_DIR = '.'
-CLASS_CSV = os.path.join(SCRIPT_DIR, 'metadata/class_metadata.csv')
-IMAGE_CSV = os.path.join(SCRIPT_DIR, 'metadata/image_metadata.csv')
-DST_DIR = os.path.join(SCRIPT_DIR, 'metadata')
+PROJECT_ROOT = '..'
 
 LABEL_MAP_FILENAME_TEMPLATE = 'top_{top}_label_map.pbtxt'
 
-LABEL_MAP_TEMPLATE = 'item {{\n    id: {label}\n    name: \'{description}\'\n}}\n\n'
+LABEL_MAP_TEMPLATE = 'item {{\n    id: {label}\n    name: \'{description}\'\n}}'
 
 
 def metadata2labelmap(metadata):
@@ -67,26 +64,23 @@ def metadata2labelmap(metadata):
 
 
 
-def process_metadata(class_metadata_path, image_metadata_path, dst_dir, top):
+def process_metadata(metadata_path, dst_dir, top):
     ''' ingest metadata, call converter, write label map
 
         Parameters
 
-        class_metadata_path: str
-            path to csv file
-
-        image_metadata_path: str
+        metadata_path: str
             path to csv file
 
         dst_dir: str
-            directory name for output
+            path to output directory
 
         top: False or int
             positive int indicating "top" most frequent classes
             to select
             False to indicate that all classes should be selected
     '''
-    metadata = metautils.load_metadata(class_metadata_path, image_metadata_path)
+    metadata = pd.read_csv(metadata_path)
 
     metadata = metautils.add_labels(metadata)
 
@@ -104,28 +98,30 @@ def process_metadata(class_metadata_path, image_metadata_path, dst_dir, top):
 
 
 if __name__ == "__main__":
+    # prescribed metadata file
+    METADATA_CSV = 'metadata.csv'
+
     # setup parser
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--class-metadata', 
-                        dest='class_metadata_path', 
-                        default=CLASS_CSV,
-                        help='Input csv file containing class metadata')
-    parser.add_argument('-i', '--image-metadata', 
-                        dest='image_metadata_path', 
-                        default=IMAGE_CSV,
-                        help='Input csv file containing image metadata')
-    parser.add_argument('-d', '--destination-directory', 
-                        dest='dst_dir', 
-                        type=str, 
-                        default=DST_DIR,
-                        help='Destination directory for label map')
+    parser.add_argument('-m', '--metadata-dir', 
+                        dest='metadata_dir', 
+                        type=parserutils.absolute_readable_path,
+                        required=True,
+                        help='path to metadata directory')
     parser.add_argument('-t', '--top', 
                         dest='top', 
                         default=False, 
-                        type=metautils.positive_int,
+                        type=parserutils.bounded_int(lower=0),
                         help='-t 5 means top 5 labels in terms of frequency \
                               should be included in label map')
 
     args, _ = parser.parse_known_args()
 
-    process_metadata(**vars(args))
+    metadata_path = os.path.join(args.metadata_dir, METADATA_CSV)
+
+    # change working directory to project root directory
+    os.chdir(PROJECT_ROOT)
+
+    process_metadata(metadata_path,
+                     args.metadata_dir,
+                     args.top)

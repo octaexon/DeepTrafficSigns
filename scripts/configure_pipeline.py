@@ -17,11 +17,10 @@ __email__ = 'octaexon@gmail.com'
 __status__ = 'Development'
 
 
+import utilities.parser_utilities as parserutils
 
-import utilities.metadata_utilities as metautils
 
-# defaults
-DEFAULT_PARAMETERS_PATH = './default_parameters.json'
+PROJECT_ROOT = '..'
 
 
 def template2pipeline(parameters_path, **kwargs):
@@ -76,16 +75,18 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--parameters-path', 
                         dest='parameters_path', 
-                        default=DEFAULT_PARAMETERS_PATH)
+                        type=parserutils.absolute_readable_path,
+                        required=True,
+                        help='path from project root to pipeline parameter file')
     parser.add_argument('-t', '--top', 
                         dest='top', 
-                        type=metautils.positive_int,
+                        type=parserutils.bounded_int(lower=0),
                         required=True,
-                        help='-t 5 means top 5 labels in terms of frequency \
-                              should be included in label map')
+                        help='-t 5 means top 5 labels in terms of frequency '
+                             + 'should be included in label map')
     parser.add_argument('-e', '--examples',
                         dest='examples',
-                        type=metautils.positive_int,
+                        type=parserutils.bounded_int(lower=0),
                         required=True,
                         help='number of samples in evaluation set')
 
@@ -93,5 +94,8 @@ if __name__ == '__main__':
 
 
     parameters_path = args.pop('parameters_path')
+
+    # change working directory to project root directory
+    os.chdir(PROJECT_ROOT)
 
     template2pipeline(parameters_path, **args)

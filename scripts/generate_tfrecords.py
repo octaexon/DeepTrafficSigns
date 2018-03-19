@@ -19,16 +19,10 @@ __status__ = 'Development'
 
 
 import utilities.metadata_utilities as metautils
+import utilities.parser_utilities as parserutils
 
 
-# defaults for input and output paths
-SCRIPT_DIR = '.'
-IMAGE_CSV = os.path.join(SCRIPT_DIR, 'metadata/image_metadata.csv')
-CLASS_CSV = os.path.join(SCRIPT_DIR, 'metadata/class_metadata.csv')
-DST_DIR = os.path.join(SCRIPT_DIR, 'metadata')
-
-#  default train evaluation split ratio
-TRAIN_FRAC = 0.80
+PROJECT_ROOT = '..'
 
 TRAIN_TFRECORD_TEMPLATE = 'top_{top}_train.tfrecord'
 EVAL_TFRECORD_TEMPLATE = 'top_{top}_eval.tfrecord'
@@ -138,19 +132,16 @@ def tf_example_generator(metadata):
                         )
 
 
-def process_metadata(class_metadata_path, image_metadata_path, dst_dir, top, train_frac):
+def process_metadata(metadata_path, dst_dir, top, train_frac):
     ''' metadata (and images) -> tensorflow record 
 
         Parameters
 
-        class_metadata_path: str
-            path to csv file
-
-        image_metadata_path: str
+        metadata_path: str
             path to csv file
 
         dst_dir: str
-            directory name for output
+            path to output directory
 
         top: False or int
             positive int indicating "top" most frequent classes
@@ -160,7 +151,7 @@ def process_metadata(class_metadata_path, image_metadata_path, dst_dir, top, tra
         train_frac: float
             fraction of samples to be used for training
     '''
-    metadata = metautils.load_metadata(class_metadata_path, image_metadata_path)
+    metadata = pd.read_csv(metadata_path)
 
     metadata = metautils.add_labels(metadata)
 
@@ -173,29 +164,49 @@ def process_metadata(class_metadata_path, image_metadata_path, dst_dir, top, tra
 
     # construct and write training record
     with tf.python_io.TFRecordWriter(train_record_path) as writer:
-        for tf_example in tf_example_generator(train_metadata):
-            writer.write(tf_example.SerializeToString())
+        for example in tf_example_generator(train_metadata):
+            writer.write(example.SerializeToString())
 
     # construct and write evaluation record
     with tf.python_io.TFRecordWriter(eval_record_path) as writer:
-        for tf_example in tf_example_generator(eval_metadata):
-            writer.write(tf_example.SerializeToString())
+        for example in tf_example_generator(eval_metadata):
+            writer.write(example.SerializeToString())
 
 
 if __name__ == '__main__':
+    # prescribed metadata file
+    METADATA_CSV = 'metadata.csv'
+
+    #  default train evaluation split ratio
+    TRAIN_FRAC = 0.80
+
     # setup parser
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--class-metadata', dest='class_metadata_path', default=CLASS_CSV,
-            help='Input csv file containing class metadata')
-    parser.add_argument('-i', '--image-metadata', dest='image_metadata_path', default=IMAGE_CSV,
-            help='Input csv file containing image metadata')
-    parser.add_argument('-d', '--destination-directory', dest='dst_dir', type=str, default=DST_DIR,
-            help='Destination directory for tfrecords')
-    parser.add_argument('-t', '--top', dest='top', default=False, type=metautils.positive_int,
-            help='-t 5 means top 5 labels in terms of frequency should be included in tfrecords')
-    parser.add_argument('-f', '--train-frac', dest='train_frac', type=str, default=TRAIN_FRAC,
-            help='train-evaluation split fraction for samples')
+    parser.add_argument('-m', '--metadata-dir', 
+                        dest='metadata_dir', 
+                        type=parserutils.absolute_readable_path,
+                        required=True,
+                        help='path to metadata directory')
+    parser.add_argument('-t', '--top', 
+                        dest='top', 
+                        default=False, 
+                        type=parserutils.bounded_int(lower=0),
+                        help='-t 5 means top 5 labels in terms of frequency \
+                              should be included in label map')
+    parser.add_argument('-f', '--train-frac', 
+                        dest='train_frac', 
+                        type=parserutils.bounded_float(lower=0, upper=1),
+                        default=TRAIN_FRAC,
+                        help='fraction of samples used for training; default={}'.format(TRAIN_FRAC))
 
     args, _ = parser.parse_known_args()
 
-    process_metadata(**vars(args))
+    metadata_path = os.path.join(args.metadata_dir, METADATA_CSV)
+
+    # change working directory to project root directory
+    os.chdir(PROJECT_ROOT)
+
+    process_metadata(metadata_path,
+                     args.metadata_dir,
+                     args.top,
+                     args.train_frac)

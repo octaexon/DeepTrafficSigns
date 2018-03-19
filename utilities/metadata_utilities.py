@@ -1,4 +1,3 @@
-import argparse
 import os
 import pandas as pd
 
@@ -15,41 +14,6 @@ __version__ = '0.1'
 __maintainer__ = 'James Ryan' 
 __email__ = 'octaexon@gmail.com'
 __status__ = 'Development'
-
-
-
-def positive_int(arg_string):
-    ''' converts parsed argument string to integer, checking for positivity
-
-        Parameter
-
-        arg_string: str
-            argument string to be converted and checked
-
-
-        Returns
-
-        positive integer
-
-
-        Raises
-
-        argparse.ArgumentTypeError
-    '''
-    try:
-        # attempt conversion
-        positive_integer = int(arg_string)
-
-        # check for positivity
-        if not positive_integer > 0:
-            raise ValueError
-
-    except ValueError:
-        msg = 'invalid unsigned int value: \'{}\''.format(arg_string)
-        raise argparse.ArgumentTypeError(msg)
-
-    return positive_integer
-
 
 
 def load_metadata(class_metadata_path, image_metadata_path):

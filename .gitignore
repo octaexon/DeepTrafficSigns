@@ -8,6 +8,7 @@ top*.pbtxt
 top*.tfrecord
 top*.config
 
+snippets/
 aux_sign_data/
 images_ppm/
 images_jpg/

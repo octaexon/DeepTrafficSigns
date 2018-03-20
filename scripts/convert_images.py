@@ -1,6 +1,7 @@
 import argparse
 import os
 from PIL import Image
+import pandas as pd
 
 
 ''' convert_images.py
@@ -21,7 +22,12 @@ __status__ = 'Development'
 import utilities.parser_utilities as parserutils
 
 
+PROJECT_ROOT = '..'
+
+PROPERTIES_CSV = 'properties.csv'
+
 EXTENSION_LOOKUP = {'JPEG': 'jpg'}
+
 
 def _valid_extension(arg):
     if not EXTENSION_LOOKUP.get(arg, None):
@@ -31,9 +37,16 @@ def _valid_extension(arg):
         raise argparse.ArgumentTypeError(msg)
     return arg
 
+def _read_input_image_properties(directory):
+    properties_path = os.path.join(directory, PROPERTIES_CSV)
+    if os.path.exists(properties_path):
+        return pd.read_csv(properties_path)
+    return None
 
-def _nohidden_listdir(path):
-    return [os.path.join(path, filename) for filename in os.listdir(path) if not filename.startswith('.')]
+
+def _list_images(path):
+    return [os.path.join(path, filename) for filename in os.listdir(path) 
+            if not (filename.startswith('.') or filename.endswith('.csv'))]
 
 
 
@@ -50,7 +63,14 @@ def convert(input_dir, output_dir, output_format, scale):
 
     os.makedirs(output_dir, exist_ok=True)
 
-    for input_path in _nohidden_listdir(input_dir):
+    input_image_properties = _read_input_image_properties(input_dir)
+
+    #TODO: could validate that the properties file has same number of lines
+    # as listed images 
+
+    output_image_properties = []
+
+    for input_path in _list_images(input_dir):
 
         output_path = _convert_path(input_path, output_dir, output_format)
 
@@ -61,6 +81,22 @@ def convert(input_dir, output_dir, output_format, scale):
         image.thumbnail(output_size)
 
         image.save(output_path, output_format)
+
+        # compute scale of output image with respect to original
+        if input_image_properties is None:
+            output_scale = scale
+        else:
+            output_scale = scale * input_image_properties.scale[input_image_properties.filename == input_path].iloc[0]
+
+        output_image_properties.append([output_path, *output_size, output_scale])
+
+    output_image_properties = pd.DataFrame(output_image_properties, columns=['filename', 'width', 'height', 'scale'])
+
+    output_image_properties.to_csv(os.path.join(output_dir, PROPERTIES_CSV), index=False)
+
+
+
+
 
 
 
@@ -91,7 +127,6 @@ if __name__ == "__main__":
     args, _ = parser.parse_known_args()
 
     # change working directory to project root directory
-    PROJECT_ROOT = '..'
     os.chdir(PROJECT_ROOT)
 
     convert(**vars(args))

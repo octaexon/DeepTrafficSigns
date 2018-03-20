@@ -18,7 +18,20 @@ __email__ = 'octaexon@gmail.com'
 __status__ = 'Development'
 
 
+import utilities.parser_utilities as parserutils
+
+
 PROJECT_ROOT = '..'
+
+PROPERTIES_CSV = 'properties.csv'
+DEFAULT_SCALE = 1.0
+
+def _read_input_image_properties(directory):
+    properties_path = os.path.join(directory, PROPERTIES_CSV)
+    if os.path.exists(properties_path):
+        return pd.read_csv(properties_path)
+    return None
+
 
 
 def generate_metadata(images_path,
@@ -53,9 +66,15 @@ def generate_metadata(images_path,
                                  .str.replace('ppm', 'jpg')
                                  .apply(lambda x: os.path.join(images_path, x)))
 
+    image_metadata = _read_input_image_properties(images_path)
 
-    metadata[['width', 'height']] = pd.DataFrame([Image.open(path).size for path in metadata.filename])
+    if image_metadata is None:
+        image_metadata = pd.DataFrame([[path, *Image.open(path).size, DEFAULT_SCALE] for path in metadata.filename],
+                                      columns=['filename', 'width', 'height', 'scale'])
 
+    metadata = metadata.merge(image_metadata, on='filename')
+
+    metadata[['xmin', 'ymin', 'xmax', 'ymax']] = metadata.apply(lambda x: x[['xmin', 'ymin', 'xmax', 'ymax']] * x['scale'], axis=1).astype('int64')
 
     with open(class_metadata_path, 'r') as fd:
         lines = fd.readlines()
@@ -79,11 +98,19 @@ def generate_metadata(images_path,
 
 
 if __name__ == '__main__':
-    # change working directory to project root directory
-    os.chdir(PROJECT_ROOT)
+    # setup parser
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--input-dir', 
+                        dest='input_dir', 
+                        type=parserutils.absolute_readable_path,
+                        required=True,
+                        help='path to input images directory')
 
-    METADATA_PATH = 'data/sign_detection_data/metadata'
-    IMAGES_PATH = 'data/sign_detection_data/images/jpg_thumbnails'
+    args, _ = parser.parse_known_args()
+
+    IMAGES_PATH = args.input_dir
+
+    METADATA_PATH = os.path.realpath(os.path.join(PROJECT_ROOT, 'data/sign_detection_data/metadata'))
 
     CLASS_METADATA_PATH = os.path.join(METADATA_PATH, 'README.txt')
     IMAGE_METADATA_PATH = os.path.join(METADATA_PATH, 'raw_metadata.txt')

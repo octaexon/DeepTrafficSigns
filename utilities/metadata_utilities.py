@@ -38,6 +38,25 @@ def load_metadata(class_metadata_path, image_metadata_path):
 
 
 
+def read_image_properties(properties_path):
+    ''' reads image properties file if it exists
+
+        Parameter
+
+        properties_path: str
+            path to properties csv file
+
+
+        Returns
+
+        pandas.Dataframe or None if file is non-existent
+    '''
+    if os.path.exists(properties_path):
+        return pd.read_csv(properties_path)
+    return None
+
+
+
 def create_output_path(dst_dir, template, **kwargs):
     ''' 
         Parameters

@@ -18,6 +18,7 @@ __email__ = 'octaexon@gmail.com'
 __status__ = 'Development'
 
 
+import utilities.metadata_utilities as metautils
 import utilities.parser_utilities as parserutils
 
 
@@ -25,13 +26,6 @@ PROJECT_ROOT = '..'
 
 PROPERTIES_CSV = 'properties.csv'
 DEFAULT_SCALE = 1.0
-
-def _read_input_image_properties(directory):
-    properties_path = os.path.join(directory, PROPERTIES_CSV)
-    if os.path.exists(properties_path):
-        return pd.read_csv(properties_path)
-    return None
-
 
 
 def generate_metadata(images_path,
@@ -45,9 +39,6 @@ def generate_metadata(images_path,
         images_path: str
             path to jpg images directory
 
-        metadata_path: str
-            path to metadata directory
-
         image_metadata_path: str
             path to raw images metadata
 
@@ -57,25 +48,37 @@ def generate_metadata(images_path,
         output_metadata_path: str
             path to write generated metadata
     '''
+    # load raw image and bounding box metadata
     metadata = pd.read_csv(image_metadata_path,
                            sep=';',
                            header=None,
-                           names=['filename', 'xmin', 'ymin', 'xmax', 'ymax', 'class_id'])
+                           names=['filename', 'xmin', 'ymin', 
+                                  'xmax', 'ymax', 'class_id'])
 
+    # create absolute file paths
+    # TODO: jpg extension is hardcoded here
     metadata.filename = (metadata.filename
                                  .str.replace('ppm', 'jpg')
                                  .apply(lambda x: os.path.join(images_path, x)))
 
-    image_metadata = _read_input_image_properties(images_path)
+    # additional image metadata, if available
+    image_metadata = metautils.read_image_properties(os.path.join(images_path, PROPERTIES_CSV))
+
 
     if image_metadata is None:
-        image_metadata = pd.DataFrame([[path, *Image.open(path).size, DEFAULT_SCALE] for path in metadata.filename],
+        # generate additional image metadata
+        image_metadata = pd.DataFrame([[path, *Image.open(path).size, DEFAULT_SCALE] 
+                                       for path in metadata.filename],
                                       columns=['filename', 'width', 'height', 'scale'])
 
     metadata = metadata.merge(image_metadata, on='filename')
 
-    metadata[['xmin', 'ymin', 'xmax', 'ymax']] = metadata.apply(lambda x: x[['xmin', 'ymin', 'xmax', 'ymax']] * x['scale'], axis=1).astype('int64')
+    # account for current and previooous scaling
+    metadata[['xmin', 'ymin', 'xmax', 'ymax']] = (
+            metadata.apply(lambda x: x[['xmin', 'ymin', 'xmax', 'ymax']] * x['scale'], axis=1)
+                    .astype('int64'))
 
+    # load raw class metadatẅa and process
     with open(class_metadata_path, 'r') as fd:
         lines = fd.readlines()
 

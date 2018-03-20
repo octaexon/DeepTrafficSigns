@@ -133,3 +133,37 @@ def absolute_writable_path(arg):
             absolute path
     '''
     return os.path.realpath(arg)
+
+
+
+def valid_format(valid_formats):
+    def validator(arg, valid_formats=valid_formats):
+        ''' validates format of files
+
+            Paraameters
+
+            arg: str
+                argument string passed from parser
+
+            valid_formats: list
+                valid file formats (usually for images)
+
+
+            Returns
+
+            validated argument string
+
+
+            Raises
+
+            argparse.ArgumentTypeError
+        '''
+        if arg not in valid_formats:
+            msg = ('invalid format : \'{}\'; '.format(arg) 
+                    + ' '.join(valid_formats)
+                    + ' supported')
+            raise argparse.ArgumentTypeError(msg)
+        return arg
+    return validator
+
+

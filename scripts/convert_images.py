@@ -19,6 +19,7 @@ __email__ = 'octaexon@gmail.com'
 __status__ = 'Development'
 
 
+import utilities.metadata_utilities as metautils
 import utilities.parser_utilities as parserutils
 
 
@@ -29,50 +30,85 @@ PROPERTIES_CSV = 'properties.csv'
 EXTENSION_LOOKUP = {'JPEG': 'jpg'}
 
 
-def _valid_extension(arg):
-    if not EXTENSION_LOOKUP.get(arg, None):
-        msg = ('invalid format : \'{}\'; '.format(arg) 
-                + ' '.join(EXTENSION_LOOKUP.keys())
-                + ' supported')
-        raise argparse.ArgumentTypeError(msg)
-    return arg
-
-def _read_input_image_properties(directory):
-    properties_path = os.path.join(directory, PROPERTIES_CSV)
-    if os.path.exists(properties_path):
-        return pd.read_csv(properties_path)
-    return None
-
 
 def _list_images(path):
+    ''' list image files only from some images directory
+
+        Paraameter
+
+        path: str
+            path to images directory
+
+
+        Returns
+
+        list of image filenames
+
+
+        Note:
+            Assumes that there are only hidden, csv or image files
+    '''
     return [os.path.join(path, filename) for filename in os.listdir(path) 
             if not (filename.startswith('.') or filename.endswith('.csv'))]
 
 
 
-def _convert_path(input_path, output_dir, output_format):
+def _convert_path(input_path, output_dir, output_ext):
+    ''' convert input path to output path, only file basename
+        without extension is invariant
+
+        Parameters
+
+        input_path: str
+            input file path
+
+        output_dir: str
+            path to output directory
+
+        output_ext: str
+            extension for output file
+
+
+        Returns
+
+        output file path
+    '''
     return os.path.join(output_dir,                                 # join output directory
                 os.path.basename(                                   # remove input directory
                     os.path.splitext(input_path)[0]                 # remove old extension
-                        + '.' + EXTENSION_LOOKUP[output_format]))   # add new extension
+                        + '.' + output_ext))                        # add new extension
 
 
 
 
 def convert(input_dir, output_dir, output_format, scale):
+    ''' convert input to output images, rescaling and reformating
 
+        Parameters
+
+        input_dir: str
+            path to input image directory
+
+        output_dir: str
+            path to output image directory
+
+        output_format: str
+            output image format for PIL library
+
+        scale: float
+            factor to rescale each coordinate
+    '''
     os.makedirs(output_dir, exist_ok=True)
 
-    input_image_properties = _read_input_image_properties(input_dir)
+    input_image_properties = metautils.read_image_properties(os.path.join(input_dir, PROPERTIES_CSV))
 
     #TODO: could validate that the properties file has same number of lines
     # as listed images 
-
     output_image_properties = []
 
     for input_path in _list_images(input_dir):
 
-        output_path = _convert_path(input_path, output_dir, output_format)
+        output_path = _convert_path(input_path, output_dir, EXTENSION_LOOKUP[output_format])
 
         image = Image.open(input_path)
 
@@ -86,16 +122,16 @@ def convert(input_dir, output_dir, output_format, scale):
         if input_image_properties is None:
             output_scale = scale
         else:
-            output_scale = scale * input_image_properties.scale[input_image_properties.filename == input_path].iloc[0]
+            output_scale = (scale * 
+                    input_image_properties.scale[input_image_properties.filename == input_path]
+                                           .iloc[0])
 
         output_image_properties.append([output_path, *output_size, output_scale])
 
-    output_image_properties = pd.DataFrame(output_image_properties, columns=['filename', 'width', 'height', 'scale'])
+    output_image_properties = pd.DataFrame(output_image_properties, 
+                                           columns=['filename', 'width', 'height', 'scale'])
 
     output_image_properties.to_csv(os.path.join(output_dir, PROPERTIES_CSV), index=False)
-
-
-
 
 
 
@@ -115,7 +151,7 @@ if __name__ == "__main__":
                         help='path to output images directory')
     parser.add_argument('-f', '--format',
                         dest='output_format',
-                        type=_valid_extension,
+                        type=parserutils.valid_format(EXTENSION_LOOKUP.keys()),
                         default='JPEG',
                         help='output format for images')
     parser.add_argument('-s', '--scale',

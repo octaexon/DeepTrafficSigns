@@ -3,13 +3,19 @@
 .ipynb_checkpoints/
 __pycache__/
 
-*metadata.csv
-top*.pbtxt
-top*.tfrecord
-top*.config
+test_generated_metadata/
+metadata/
+!metadata/GTSDB_readme.txt
+!metadata/GTSDB_raw_metadata.txt
+
+models/sign_detection_model/*
+!models/sign_detection_model/default_parameters.json
+!models/sign_detection_model/template_ssd_mobilenet_v1.config
+
+!models/sign_detection_model/ssd_mobilenet_v1_coco_2017_11_17/README.md
 
 snippets/
 aux_sign_data/
-images/
+ppm/
+jpg*/
 pretrained_gzips/
-ssd_mobilenet_v1_coco_2017_11_17/

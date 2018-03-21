@@ -115,8 +115,8 @@ if __name__ == '__main__':
 
     METADATA_PATH = os.path.realpath(os.path.join(PROJECT_ROOT, 'data/sign_detection_data/metadata'))
 
-    CLASS_METADATA_PATH = os.path.join(METADATA_PATH, 'README.txt')
-    IMAGE_METADATA_PATH = os.path.join(METADATA_PATH, 'raw_metadata.txt')
+    CLASS_METADATA_PATH = os.path.join(METADATA_PATH, 'GTSDB_readme.txt')
+    IMAGE_METADATA_PATH = os.path.join(METADATA_PATH, 'GTSDB_raw_metadata.txt')
     OUTPUT_METADATA_PATH = os.path.join(METADATA_PATH, 'metadata.csv')
 
     generate_metadata(IMAGES_PATH, 

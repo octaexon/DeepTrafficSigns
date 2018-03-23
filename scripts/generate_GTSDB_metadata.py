@@ -113,7 +113,7 @@ if __name__ == '__main__':
 
     IMAGES_PATH = args.input_dir
 
-    METADATA_PATH = os.path.realpath(os.path.join(PROJECT_ROOT, 'data/sign_detection_data/metadata'))
+    METADATA_PATH = os.path.realpath(os.path.join(PROJECT_ROOT, 'metadata'))
 
     CLASS_METADATA_PATH = os.path.join(METADATA_PATH, 'GTSDB_readme.txt')
     IMAGE_METADATA_PATH = os.path.join(METADATA_PATH, 'GTSDB_raw_metadata.txt')

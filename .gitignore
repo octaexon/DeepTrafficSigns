@@ -3,19 +3,24 @@
 .ipynb_checkpoints/
 __pycache__/
 
-test_generated_metadata/
-metadata/
+
+data/*
+!data/images/
+data/images/*
+!data/images/README.md
+
+metadata/*
 !metadata/GTSDB_readme.txt
 !metadata/GTSDB_raw_metadata.txt
 
-models/sign_detection_model/*
-!models/sign_detection_model/default_parameters.json
-!models/sign_detection_model/template_ssd_mobilenet_v1.config
 
-!models/sign_detection_model/ssd_mobilenet_v1_coco_2017_11_17/README.md
+models/pretrained_gzips/
+
+models/ssd_mobilenet_v1_coco_2017_11_17/*
+!models/ssd_mobilenet_v1_coco_2017_11_17/local_parameters.json
+!models/ssd_mobilenet_v1_coco_2017_11_17/cloud_parameters.json
+!models/ssd_mobilenet_v1_coco_2017_11_17/template.config
+!models/ssd_mobilenet_v1_coco_2017_11_17/README.md
+
 
 snippets/
-aux_sign_data/
-ppm/
-jpg*/
-pretrained_gzips/

@@ -77,7 +77,7 @@ if __name__ == '__main__':
                         dest='parameters_path', 
                         type=parserutils.absolute_readable_path,
                         required=True,
-                        help='path from project root to pipeline parameter file')
+                        help='path to pipeline parameter file')
     parser.add_argument('-t', '--top', 
                         dest='top', 
                         type=parserutils.bounded_int(lower=0),

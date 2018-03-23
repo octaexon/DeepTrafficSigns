@@ -187,6 +187,11 @@ if __name__ == '__main__':
                         type=parserutils.absolute_readable_path,
                         required=True,
                         help='path to metadata directory')
+    parser.add_argument('-d', '--data-dir', 
+                        dest='data_dir', 
+                        type=parserutils.absolute_writable_path,
+                        required=True,
+                        help='path to data directory')
     parser.add_argument('-t', '--top', 
                         dest='top', 
                         default=False, 
@@ -207,6 +212,6 @@ if __name__ == '__main__':
     os.chdir(PROJECT_ROOT)
 
     process_metadata(metadata_path,
-                     args.metadata_dir,
+                     args.data_dir,
                      args.top,
                      args.train_frac)

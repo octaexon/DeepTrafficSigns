@@ -34,7 +34,7 @@ EXTENSION_LOOKUP = {'JPEG': 'jpg'}
 def _list_images(path):
     ''' list image files only from some images directory
 
-        Paraameter
+        Parameter
 
         path: str
             path to images directory

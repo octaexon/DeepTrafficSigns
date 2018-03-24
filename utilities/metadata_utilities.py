@@ -82,8 +82,8 @@ def create_output_path(dst_dir, template, **kwargs):
 
 
 
-def add_labels(metadata):
-    ''' add a "label" column to some metadata by ranking frequency
+def select_metadata(metadata, top):
+    ''' add an "id" column to some metadata by ranking frequency
         of the associated "class_id"
 
         Parameters
@@ -91,44 +91,43 @@ def add_labels(metadata):
         metadata: pandas.DataFrame
             required column: class_id
 
-
-        Returns
-
-        labeled_metadata: pandas.DataFrame
-    '''
-    return (metadata.groupby('class_id')
-                    .size()
-                    .rank(method='first', ascending=False)  
-                    .astype(int)
-                    .to_frame(name='label')
-                    .merge(metadata, left_index=True, right_on='class_id'))
-
-
-
-def get_top_metadata(top, metadata):
-    ''' get valid top and top metadata based on label
-
-        Parameters
-
-        top: False or int
-            positive int indicating number of classes to select
-            to select
-            False to indicate that all classes should be selected
-
-        metadata: pandas.DataFrame
-            image/class metadata
-            required columns: class_id, label
+        top: positive int
+            "top" most frequent classes to "id"
 
 
         Returns
 
-        (valid_top, top_metadata): tuple(int, pandas.DataFrame)
-            valid_top is a positive integer less than the total number of classes
-            top_metadata is the "top" ranked classes as indicated "label" column
-
+        pandas.DataFrame
+            subselection of metadata corresponding to "top"
+            most frequent classes
     '''
     nr_classes_occurring = metadata.class_id.unique().size
     if not top or top > nr_classes_occurring:
         top = nr_classes_occurring
 
-    return top, metadata.query('label <= @top')
+    return (metadata.groupby('class_id')
+                    .size()
+                    .rank(method='first', ascending=False)  
+                    .astype(int)
+                    .to_frame(name='id')
+                    .query('id <= @top')
+                    .merge(metadata, left_index=True, right_on='class_id'))
+
+
+
+def get_metadata_for_ids(metadata):
+    ''' returns metadata that has been given label map ids
+
+        Parameter
+
+        metadata: pandas.DataFrame
+            image metadata
+            required column: id
+
+
+        Return
+
+        pandas.DataFrame
+            image metadata with non-null ids
+    '''
+    return metadata[pd.notnull(metadata.id)]

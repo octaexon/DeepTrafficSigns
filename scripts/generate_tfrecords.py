@@ -2,6 +2,7 @@ import argparse
 import os
 import pandas as pd
 import tensorflow as tf
+import json
 
 ''' generate_tfrecords.py
 
@@ -23,10 +24,6 @@ import utilities.parser_utilities as parserutils
 
 
 PROJECT_ROOT = '..'
-
-TRAIN_TFRECORD_TEMPLATE = 'top_{top}_train.tfrecord'
-EVAL_TFRECORD_TEMPLATE = 'top_{top}_eval.tfrecord'
-
 
 # TODO: sampling is greedy by may still need to check 
 # if classes small that there is something in training set
@@ -59,6 +56,34 @@ def _train_eval_split(metadata, train_frac, random_state=1):
     return train_metadata, eval_metadata
 
 
+
+def _generate_hyperparameter_dict(train_metadata, eval_metadata):
+    ''' generates model hyperparameters dictionary
+
+        Parameters
+
+        train_metadata: pandas.DataFrame
+
+        eval_metadata: pandas.DataFrame
+
+
+        Returns
+
+        dict
+            model parameters
+    '''
+    num_train_classes = len(train_metadata.id.unique())
+    num_eval_samples = len(eval_metadata)
+
+    return {'SIZES': 
+            {
+                'NUM_TRAIN_CLASSES': num_train_classes,
+                'NUM_EVAL_SAMPLES': num_eval_samples
+            }
+           }
+
+
+
 # helper functions to streamline tf.train.Feature creation
 
 def _byte_feature(value):
@@ -83,7 +108,7 @@ def tf_example_generator(metadata):
             image, bounding box and class metadata
             required columns: filename, width, height, 
                               xmin, xmax, ymin, ymax,
-                              description, label
+                              description, id
 
 
         Yields
@@ -109,7 +134,7 @@ def tf_example_generator(metadata):
         ymins = (bbox_metadata.ymin / height).tolist()
         ymaxs = (bbox_metadata.ymax / height).tolist()
 
-        class_labels = bbox_metadata.label.tolist()
+        class_labels = bbox_metadata.id.tolist()
         class_texts = bbox_metadata.description.astype('bytes').tolist()
 
         yield tf.train.Example(
@@ -132,7 +157,7 @@ def tf_example_generator(metadata):
                         )
 
 
-def process_metadata(metadata_path, dst_dir, top, train_frac):
+def process_metadata(metadata_path, train_record_path, eval_record_path, parameter_path, train_frac):
     ''' metadata (and images) -> tensorflow record 
 
         Parameters
@@ -140,27 +165,26 @@ def process_metadata(metadata_path, dst_dir, top, train_frac):
         metadata_path: str
             path to csv file
 
-        dst_dir: str
-            path to output directory
+        train_record_path: str
+            path to training TFRecord
 
-        top: False or int
-            positive int indicating "top" most frequent classes
-            to select
-            False to indicate that all classes should be selected
+        eval_record_path: str
+            path to evaluation TFRecord
+
+        parameter_path: str
+            path to parameter json
+            contain number of classes, split information
 
         train_frac: float
             fraction of samples to be used for training
     '''
     metadata = pd.read_csv(metadata_path)
 
-    metadata = metautils.add_labels(metadata)
-
-    top, metadata = metautils.get_top_metadata(top, metadata)
-
     train_metadata, eval_metadata = _train_eval_split(metadata, train_frac)
 
-    train_record_path = metautils.create_output_path(dst_dir, TRAIN_TFRECORD_TEMPLATE, top=top)
-    eval_record_path = metautils.create_output_path(dst_dir, EVAL_TFRECORD_TEMPLATE, top=top)
+    with open(parameter_path, 'w') as fp:
+        hyperparameters = _generate_hyperparameter_dict(train_metadata, eval_metadata)
+        json.dump(hyperparameters, fp)
 
     # construct and write training record
     with tf.python_io.TFRecordWriter(train_record_path) as writer:
@@ -175,7 +199,13 @@ def process_metadata(metadata_path, dst_dir, top, train_frac):
 
 if __name__ == '__main__':
     # prescribed metadata file
-    METADATA_CSV = 'metadata.csv'
+    METADATA_CSV = 'selected_metadata.csv'
+
+    TRAIN_TFRECORD = 'train.tfrecord'
+    EVAL_TFRECORD = 'eval.tfrecord'
+
+    PARAMETER_JSON = 'hyperparameters.json'
+
 
     #  default train evaluation split ratio
     TRAIN_FRAC = 0.80
@@ -192,12 +222,11 @@ if __name__ == '__main__':
                         type=parserutils.absolute_writable_path,
                         required=True,
                         help='path to data directory')
-    parser.add_argument('-t', '--top', 
-                        dest='top', 
-                        default=False, 
-                        type=parserutils.bounded_int(lower=0),
-                        help='-t 5 means top 5 labels in terms of frequency \
-                              should be included in label map')
+    parser.add_argument('-l', '--model-dir', 
+                        dest='model_dir', 
+                        type=parserutils.absolute_writable_path,
+                        required=True,
+                        help='path to model directory')
     parser.add_argument('-f', '--train-frac', 
                         dest='train_frac', 
                         type=parserutils.bounded_float(lower=0, upper=1),
@@ -207,11 +236,16 @@ if __name__ == '__main__':
     args, _ = parser.parse_known_args()
 
     metadata_path = os.path.join(args.metadata_dir, METADATA_CSV)
+    train_record_path = os.path.join(args.data_dir, TRAIN_TFRECORD)
+    eval_record_path = os.path.join(args.data_dir, EVAL_TFRECORD)
+    parameter_path = os.path.join(args.model_dir, PARAMETER_JSON)
+
 
     # change working directory to project root directory
     os.chdir(PROJECT_ROOT)
 
     process_metadata(metadata_path,
-                     args.data_dir,
-                     args.top,
+                     train_record_path,
+                     eval_record_path,
+                     parameter_path,
                      args.train_frac)

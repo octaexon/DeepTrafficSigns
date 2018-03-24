@@ -19,23 +19,17 @@ __status__ = 'Development'
 
 import utilities.parser_utilities as parserutils
 
-
 PROJECT_ROOT = '..'
 
-
-def template2pipeline(parameters_path, **kwargs):
+def template2pipeline(parameters_path, hyperparameters_path):
     ''' fills the placeholders in the config file
 
         Parameter
 
-        parameter_file: str
+        parameter_path: str
             json file
             required structure:
                 {
-                    'SIZES':
-                    {
-                        ...
-                    },
                     'PATHS':
                     {
                         'PATH_TO_TEMPLATE_CONFIG': ...,
@@ -43,17 +37,31 @@ def template2pipeline(parameters_path, **kwargs):
                         ...
                     }
                 }
+
+        hyperparameters_path: str
+            json file
+            required structure:
+                {
+                    'SIZES':
+                    {
+                        ...
+                    }
+                }
+ 
     '''
     with open(parameters_path, 'r') as fd:
         parameters = json.load(fd)
 
+    with open(hyperparameters_path, 'r') as fd:
+        hyperparameters = json.load(fd)
+
     # convert relative to absolute paths
-    paths = {key: os.path.realpath(path).format(**kwargs)
+    paths = {key: os.path.realpath(path)
                 for key, path in parameters['PATHS'].items()}
 
     # specify size parameters
-    sizes = {key: size.format(**kwargs) 
-                for key, size in parameters['SIZES'].items()}
+    sizes = {key: size
+                for key, size in hyperparameters['SIZES'].items()}
 
     template_file = paths['PATH_TO_TEMPLATE_CONFIG']
     with open(template_file, 'r') as fd:
@@ -72,30 +80,34 @@ def template2pipeline(parameters_path, **kwargs):
 
 
 if __name__ == '__main__':
+    HYPERPARAMETERS_JSON = 'hyperparameters.json'
+    LOCAL_PARAMETERS_JSON = 'local_parameters.json'
+    CLOUD_PARAMETERS_JSON = 'cloud_parameters.json'
+
     parser = argparse.ArgumentParser()
-    parser.add_argument('-p', '--parameters-path', 
-                        dest='parameters_path', 
+    parser.add_argument('-m', '--model-dir', 
+                        dest='model_dir', 
                         type=parserutils.absolute_readable_path,
                         required=True,
-                        help='path to pipeline parameter file')
-    parser.add_argument('-t', '--top', 
-                        dest='top', 
-                        type=parserutils.bounded_int(lower=0),
-                        required=True,
-                        help='-t 5 means top 5 labels in terms of frequency '
-                             + 'should be included in label map')
-    parser.add_argument('-e', '--examples',
-                        dest='examples',
-                        type=parserutils.bounded_int(lower=0),
-                        required=True,
-                        help='number of samples in evaluation set')
-
-    args = vars(parser.parse_args())
+                        help='path to model directory')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('-l', '--local',
+                       action='store_true',
+                       help='set up pipeline to run locally')
+    group.add_argument('-c', '--cloud',
+                       action='store_true',
+                       help='set up pipeline to run in the cloud')
 
 
-    parameters_path = args.pop('parameters_path')
+    args, _ = parser.parse_known_args()
+
+    hyperparameters_path = os.path.join(args.model_dir, HYPERPARAMETERS_JSON)
+
+    if args.local:
+        parameters_path = os.path.join(args.model_dir, LOCAL_PARAMETERS_JSON)
+    parameters_path = os.path.join(args.model_dir, CLOUD_PARAMETERS_JSON)
 
     # change working directory to project root directory
     os.chdir(PROJECT_ROOT)
 
-    template2pipeline(parameters_path, **args)
+    template2pipeline(parameters_path, hyperparameters_path)

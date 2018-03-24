@@ -25,9 +25,8 @@ import utilities.parser_utilities as parserutils
 
 PROJECT_ROOT = '..'
 
-LABEL_MAP_FILENAME_TEMPLATE = 'top_{top}_label_map.pbtxt'
 
-LABEL_MAP_TEMPLATE = 'item {{\n    id: {label}\n    name: \'{description}\'\n}}'
+LABEL_MAP_TEMPLATE = 'item {{\n    id: {id}\n    name: \'{description}\'\n}}'
 
 
 def metadata2labelmap(metadata):
@@ -36,35 +35,28 @@ def metadata2labelmap(metadata):
         Parameters
 
         metadata: pandas.DataFrame
-            metadata must contain columns: label, class_id, description, category
+            metadata must contain columns: id, class_id, description, category
 
 
         Returns
 
         label_map: str
             label map for the "top" classes with fields:
-                id: metadata.label             <- class identifier (*)
-                name: metadata.description     <- class display (*)
-                original_id: metadata.class_id <- original class id in class metadata
-                category: metadata.category    <- category for sign
+                id: metadata.id                <- identifier of class within tensorflow
+                name: metadata.description     <- textual name of class
 
-        Notes
-        (*) signifies that this is a label map field required by 
-            object detection api
-
-        id parameters for label map must be unique and greater than 0, since
+        id parameters for label map must be unique and begin at 1, since
         0 is reserved as the id for the null class
     '''
-
-    return (metadata[['label', 'description', 'class_id', 'category']]
+    return (metadata[['id', 'description', 'class_id', 'category']]
                     .drop_duplicates()
-                    .sort_values(by='label')
+                    .sort_values(by='id')
                     .apply(lambda x: LABEL_MAP_TEMPLATE.format(**x.to_dict()), axis=1)
                     .str.cat(sep='\n\n'))
 
 
 
-def process_metadata(metadata_path, dst_dir, top):
+def process_metadata(metadata_path, selected_metadata_path, label_map_path, top):
     ''' ingest metadata, call converter, write label map
 
         Parameters
@@ -72,7 +64,10 @@ def process_metadata(metadata_path, dst_dir, top):
         metadata_path: str
             path to csv file
 
-        dst_dir: str
+        selected_metadata_path: str
+            path to csv file
+
+        output_dir: str
             path to output directory
 
         top: False or int
@@ -82,17 +77,15 @@ def process_metadata(metadata_path, dst_dir, top):
     '''
     metadata = pd.read_csv(metadata_path)
 
-    metadata = metautils.add_labels(metadata)
-
-    top, metadata = metautils.get_top_metadata(top, metadata)
- 
-    label_map_path = metautils.create_output_path(dst_dir, LABEL_MAP_FILENAME_TEMPLATE, top=top)
+    selected_metadata = metautils.select_metadata(metadata, top)
 
     with open(label_map_path, 'w') as fd:
         # create label map parameters
-        label_map = metadata2labelmap(metadata)
+        label_map = metadata2labelmap(selected_metadata)
         # write to disk
         fd.write(label_map)
+
+    selected_metadata.to_csv(selected_metadata_path, index=False)
 
 
 
@@ -100,6 +93,8 @@ def process_metadata(metadata_path, dst_dir, top):
 if __name__ == "__main__":
     # prescribed metadata file
     METADATA_CSV = 'metadata.csv'
+    SELECTED_METADATA_CSV = 'selected_metadata.csv'
+    LABEL_MAP_PBTXT = 'label_map.pbtxt'
 
     # setup parser
     parser = argparse.ArgumentParser()
@@ -122,11 +117,16 @@ if __name__ == "__main__":
 
     args, _ = parser.parse_known_args()
 
+
     metadata_path = os.path.join(args.metadata_dir, METADATA_CSV)
+    selected_metadata_path = os.path.join(args.metadata_dir, SELECTED_METADATA_CSV)
+    label_map_path = os.path.join(args.data_dir, LABEL_MAP_PBTXT)
+
 
     # change working directory to project root directory
     os.chdir(PROJECT_ROOT)
 
     process_metadata(metadata_path,
-                     args.data_dir,
+                     selected_metadata_path,
+                     label_map_path,
                      args.top)

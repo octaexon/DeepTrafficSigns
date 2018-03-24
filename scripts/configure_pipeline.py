@@ -105,7 +105,8 @@ if __name__ == '__main__':
 
     if args.local:
         parameters_path = os.path.join(args.model_dir, LOCAL_PARAMETERS_JSON)
-    parameters_path = os.path.join(args.model_dir, CLOUD_PARAMETERS_JSON)
+    else:
+        parameters_path = os.path.join(args.model_dir, CLOUD_PARAMETERS_JSON)
 
     # change working directory to project root directory
     os.chdir(PROJECT_ROOT)

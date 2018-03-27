@@ -124,7 +124,8 @@ def tf_example_generator(metadata):
             encoded_data = fd.read()
 
         # preprocess image and bboxes metadata
-        encoded_filename = bytes(os.path.realpath(filename), 'utf-8')
+        encoded_filename = os.path.realpath(filename).encode('utf-8')
+        #encoded_filename = bytes(os.path.realpath(filename), 'utf-8')
         encoded_format = b'jpg' 
 
         # rescale bounding box coordinates to [0, 1]
@@ -135,7 +136,8 @@ def tf_example_generator(metadata):
         ymaxs = (bbox_metadata.ymax / height).tolist()
 
         class_labels = bbox_metadata.id.tolist()
-        class_texts = bbox_metadata.description.astype('bytes').tolist()
+        class_texts = bbox_metadata.description.str.encode('utf-8').tolist()
+        #class_texts = bbox_metadata.description.astype('bytes').tolist()
 
         yield tf.train.Example(
                         features=tf.train.Features(

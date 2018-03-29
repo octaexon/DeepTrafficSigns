@@ -7,9 +7,11 @@ __pycache__/
 
 
 data/*
-!data/images/
-data/images/*
-!data/images/README.md
+!data/README.md
+
+images/*
+#!images/GTSDB_jpg
+!images/README.md
 
 metadata/*
 !metadata/GTSDB_readme.txt

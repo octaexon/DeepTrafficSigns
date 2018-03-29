@@ -103,15 +103,15 @@ def generate_metadata(images_path,
 if __name__ == '__main__':
     # setup parser
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input-dir', 
-                        dest='input_dir', 
+    parser.add_argument('-i', '--images-dir', 
+                        dest='images_dir', 
                         type=parserutils.absolute_readable_path,
                         required=True,
-                        help='path to input images directory')
+                        help='path to images directory')
 
     args, _ = parser.parse_known_args()
 
-    IMAGES_PATH = args.input_dir
+    IMAGES_PATH = args.images_dir
 
     METADATA_PATH = os.path.realpath(os.path.join(PROJECT_ROOT, 'metadata'))
 

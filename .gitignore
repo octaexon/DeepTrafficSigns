@@ -19,9 +19,6 @@ metadata/*
 models/pretrained_gzips/
 
 models/mobilenet/*
-!models/mobilenet/local_parameters.json
-!models/mobilenet/cloud_parameters.json
-!models/mobilenet/cloud_pipeline.config
 !models/mobilenet/template.config
 !models/mobilenet/README.md
 

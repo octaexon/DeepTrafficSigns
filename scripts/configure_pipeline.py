@@ -21,22 +21,18 @@ import utilities.parser_utilities as parserutils
 
 PROJECT_ROOT = '..'
 
-def template2pipeline(parameters_path, hyperparameters_path):
+def template2pipeline(template_path, pipeline_path, hyperparameters_path, project_root):
     ''' fills the placeholders in the config file
 
         Parameter
 
-        parameter_path: str
-            json file
-            required structure:
-                {
-                    'PATHS':
-                    {
-                        'PATH_TO_TEMPLATE_CONFIG': ...,
-                        'PATH_TO_PIPELINE_CONFIG': ...,
-                        ...
-                    }
-                }
+        template_path: str
+            path to template config file for pipeline
+            required placeholder key:
+                PROJECT_ROOT
+
+        pipeline_path: str
+            path to pipeline config file
 
         hyperparameters_path: str
             json file
@@ -47,42 +43,35 @@ def template2pipeline(parameters_path, hyperparameters_path):
                         ...
                     }
                 }
- 
-    '''
-    with open(parameters_path, 'r') as fd:
-        parameters = json.load(fd)
 
+        project_root: str
+            path to project root (local or cloud)
+    '''
     with open(hyperparameters_path, 'r') as fd:
         hyperparameters = json.load(fd)
-
-    # convert relative to absolute paths
-    paths = {key: os.path.realpath(path)
-                for key, path in parameters['PATHS'].items()}
 
     # specify size parameters
     sizes = {key: size
                 for key, size in hyperparameters['SIZES'].items()}
 
-    template_file = paths['PATH_TO_TEMPLATE_CONFIG']
-    with open(template_file, 'r') as fd:
+    with open(template_path, 'r') as fd:
         template_config = fd.read()
 
     # used the merged dictionaries to fill template
-    pipeline_config = template_config % {**paths, **sizes}
+    pipeline_config = template_config % {'PROJECT_ROOT': project_root, **sizes}
 
-
-    pipeline_file = paths['PATH_TO_PIPELINE_CONFIG']
     # ensure existence of directories
-    os.makedirs(os.path.dirname(pipeline_file), exist_ok=True)
+    os.makedirs(os.path.dirname(pipeline_path), exist_ok=True)
 
-    with open(pipeline_file, 'w') as fd:
+    with open(pipeline_path, 'w') as fd:
         fd.write(pipeline_config)
 
 
 if __name__ == '__main__':
     HYPERPARAMETERS_JSON = 'hyperparameters.json'
-    LOCAL_PARAMETERS_JSON = 'local_parameters.json'
-    CLOUD_PARAMETERS_JSON = 'cloud_parameters.json'
+    TEMPLATE_FILE = 'template.config'
+    PIPELINE_FILE = 'pipeline.config'
+    LOCAL_PROJECT_ROOT = os.path.realpath(PROJECT_ROOT)
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-m', '--model-dir', 
@@ -93,22 +82,25 @@ if __name__ == '__main__':
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-l', '--local',
                        action='store_true',
-                       help='set up pipeline to run locally')
-    group.add_argument('-c', '--cloud',
-                       action='store_true',
-                       help='set up pipeline to run in the cloud')
+                       help='setup up to run locally')
+    group.add_argument('-c', '--cloud-root',
+                       dest='cloud_project_root',
+                       type=str,
+                       help='path to remote project')
 
 
     args, _ = parser.parse_known_args()
 
     hyperparameters_path = os.path.join(args.model_dir, HYPERPARAMETERS_JSON)
+    template_path = os.path.join(args.model_dir, TEMPLATE_FILE)
+    pipeline_path = os.path.join(args.model_dir, PIPELINE_FILE)
 
     if args.local:
-        parameters_path = os.path.join(args.model_dir, LOCAL_PARAMETERS_JSON)
+        project_root = LOCAL_PROJECT_ROOT
     else:
-        parameters_path = os.path.join(args.model_dir, CLOUD_PARAMETERS_JSON)
+        project_root = args.cloud_project_root
 
     # change working directory to project root directory
     os.chdir(PROJECT_ROOT)
 
-    template2pipeline(parameters_path, hyperparameters_path)
+    template2pipeline(template_path, pipeline_path, hyperparameters_path, project_root)

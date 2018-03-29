@@ -17,12 +17,12 @@ metadata/*
 
 models/pretrained_gzips/
 
-models/ssd_mobilenet_v1_coco_2017_11_17/*
-!models/ssd_mobilenet_v1_coco_2017_11_17/local_parameters.json
-!models/ssd_mobilenet_v1_coco_2017_11_17/cloud_parameters.json
-!models/ssd_mobilenet_v1_coco_2017_11_17/cloud_pipeline.config
-!models/ssd_mobilenet_v1_coco_2017_11_17/template.config
-!models/ssd_mobilenet_v1_coco_2017_11_17/README.md
+models/mobilenet/*
+!models/mobilenet/local_parameters.json
+!models/mobilenet/cloud_parameters.json
+!models/mobilenet/cloud_pipeline.config
+!models/mobilenet/template.config
+!models/mobilenet/README.md
 
 
 snippets/

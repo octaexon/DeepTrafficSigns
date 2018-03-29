@@ -23,10 +23,10 @@ gsutil cp ${LOCAL_PROJECT_ROOT}'/data/eval.tfrecord' ${REMOTE_PROJECT_ROOT}'/dat
 gsutil cp ${LOCAL_PROJECT_ROOT}/data/label_map.pbtxt ${REMOTE_PROJECT_ROOT}/data/label_map.pbtxt
 
 # model transfer
-export REMOTE_PIPELINE_CONFIG=${REMOTE_PROJECT_ROOT}/models/ssd_mobilenet_v1_coco_2017_11_17/pipeline.config
+export REMOTE_PIPELINE_CONFIG=${REMOTE_PROJECT_ROOT}/models/mobilenet/pipeline.config
 
-gsutil cp ${LOCAL_PROJECT_ROOT}/models/ssd_mobilenet_v1_coco_2017_11_17/cloud_pipeline.config ${REMOTE_PIPELINE_CONFIG}
-gsutil cp ${LOCAL_PROJECT_ROOT}/models/ssd_mobilenet_v1_coco_2017_11_17/model.ckpt* ${REMOTE_PROJECT_ROOT}/models/ssd_mobilenet_v1_coco_2017_11_17/
+gsutil cp ${LOCAL_PROJECT_ROOT}/models/mobilenet/cloud_pipeline.config ${REMOTE_PIPELINE_CONFIG}
+gsutil cp ${LOCAL_PROJECT_ROOT}/models/mobilenet/model.ckpt* ${REMOTE_PROJECT_ROOT}/models/mobilenet/
 
 # list remote directory
 gsutil ls -r gs://${BUCKET_NAME}

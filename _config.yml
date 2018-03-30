@@ -1,2 +1,4 @@
 repository: octaexon/DeepTrafficSigns
 theme: jekyll-theme-cayman
+exclude: ['Gemfile', 'Gemfile.lock', 'data', 'detector', 'images', 'metadata', 'models', 'scratch.ipynb', 'simulations', 'snippets', 'tensorflow', 'utilities', 'scratch.ipynb']
+

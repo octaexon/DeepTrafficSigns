@@ -1,0 +1,15 @@
+.DS_Store
+.ipynb_checkpoints
+.python-version
+
+/data
+/detector
+/images
+/metadata
+/models
+/scratch.ipynb
+/simulations
+/snippets
+/tensorflow
+/utilities
+

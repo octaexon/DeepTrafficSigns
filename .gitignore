@@ -30,3 +30,5 @@ snippets/
 
 simulations/*
 !simulations/README.md
+
+/_site

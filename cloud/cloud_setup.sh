@@ -18,7 +18,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=$1
 PROJECT_ID=$(gcloud config list project --format "value(core.project)")
 
 export REMOTE_PROJECT_ROOT=gs://${PROJECT_ID}-mlengine
-#gsutil mb ${REMOTE_PROJECT_ROOT}
+gsutil mb ${REMOTE_PROJECT_ROOT}
 
 export SIMULATION_ID=simulation_$(date +%s)
 

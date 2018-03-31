@@ -6,7 +6,7 @@ In the 1st quarter of 2018, I participated in an intensive data science program 
 Science Retreat](https://www.datascienceretreat.com).  In the latter stages, we were tasked with
 developing a *portfolio project* to showcase some of the skills we had developed over the preceding
 months.  My interest in computer vision and deep learning pushed me towards object detection with
-neural networks and road sign assistance held out the promise of an interesting and topical use
+neural networks, and road sign assistance held out the promise of an interesting and topical use
 case. From the standpoint of autonomous transport, environment comprehension is of utmost importance
 and, given the time constraints, road sign detection and recognition seemed feasible in some form.
 Ultimately, I was hoping to gain some insight into the topic in general, and to pick up some cool

@@ -1,6 +1,6 @@
 
 ### Links
-[home](/) &#8226; [introduction](#)
+[home](../README.md) &#8226; [introduction](#)
 
 ### Introduction
 

@@ -9,7 +9,7 @@ Before launching into the nitty gritty, I should spare a word or two for my deve
 I'm working on that renowned workhorse of high performance computing, the MacBook Air. Indeed, we'll
 talk about the cloud later, but for the moment:
 
-- **shell** I use the zsh (it waiting for you in /bin) with the
+- **shell** I use the zsh (it's patiently waiting for you in /bin) with the
   [oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh) framework for configuration. What is
   especially nice is the host of plugins that oh-my-zsh provides.  Honestly, I don't think I'll ever
   go back to bash.
@@ -21,8 +21,7 @@ talk about the cloud later, but for the moment:
   development of this project, there was a fragility in running the [Tensorflow Object
   Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection) on
   the Google Cloud Platform ML Engine using the python 3.5 runtime, meaning to say that it simply
-  didn't work in the cloud.  The other option provided in
-  the cloud is the python 2.7 runtime.
+  didn't work in the cloud.  The other option provided in the cloud is the python 2.7 runtime.
 
   So I wanted to be able to switch between python 3.5 and 2.7 effortlessly, while still maintaining
   the insulation of their respective virtual environments.  The pyenv/pyenv-virtualenv combination
@@ -45,9 +44,11 @@ talk about the cloud later, but for the moment:
   # within root directory of our project
   pyenv local dts3 dts2
   ```
-  A wonderful feature is the hierarchical stucture, so for example all of python, pip and python3,
+  A wonderful feature is the hierarchical stucture, so for example all of the python, pip and python3,
   pip3 commands resolve to the dts3 virtual environment, while only python2, pip2 resolve to the dts2
-  virtual environment. 
+  virtual environment. This suited me down to the ground as most of my development was in python
+  3 with the newest versions of various modules, while I only rarely needed to call python2
+  (sometimes with older versions of the same packages).
 
   Another beautiful facet of oh-my-zsh in this instance is that its pyenv plugin activates and
   deactivates the virtual environment as you enter and exit the project path. No more manual

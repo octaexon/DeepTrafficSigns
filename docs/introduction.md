@@ -4,7 +4,7 @@
 ### Introduction
 
 Well, let's get the ball rolling by first attempting to understand more precisely what I would
-actually like do. 
+actually like to do. 
 
 #### Task
 
@@ -44,11 +44,16 @@ constraints that come into play.
 The fallout of these constraints is not only that I'm engaged in a tightrope act, but also that
 I need to be careful in how I devise a metric by which I judge the outcome.  Even restricting to
 a small subset of signs, assuming an appropriately chosen network architecture, training
-mechanism, hyperparameters and so on, I probably don't have enough time to train to such a model to
-(internally-speaking) its optimal state. 
+mechanism, hyperparameters and so on, I probably don't have enough time to train such a model to its
+(internally-speaking) optimal state. 
 
 Clearly, I can't specify the details of this metric at the outset, because it depends quite
-explicity on project progression; it is about putting hard numbers to the fluffy parts of the constraints above.
-However, I should be able to state it clearly a posteriori.
+explicity on project progression; it is about putting hard numbers to the fluffy parts of the
+constraints above.  However, I should be able to state it clearly a posteriori.
 
-Anyway, let's get on with getting on...
+Moreover, it also affects what I mean by "alerting the driver".  It's evident that I would need
+quite a bit more contextual information to notify the driver in an "intelligent" way: are they
+breaking the speed limit; which of the potentially many signs in the frame refer to them; etc.  Such
+questions must be postponed to another day.
+
+Anyway, let's get on with getting on ...

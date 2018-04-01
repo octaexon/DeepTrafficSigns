@@ -1,5 +1,5 @@
 title: Deep Traffic Signs
 description: Real-time road sign assistance
 repository: octaexon/DeepTrafficSigns
-exclude: ['Gemfile', 'Gemfile.lock', 'data', 'detector', 'images', 'metadata', 'models', 'scratch.ipynb', 'simulations', 'snippets', 'tensorflow', 'utilities', 'scratch.ipynb']
+source: src
 theme: jekyll-theme-dinky

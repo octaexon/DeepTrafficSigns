@@ -36,7 +36,7 @@ def read_image_properties(properties_path):
 
 
 
-def select_metadata(metadata, top):
+def select_metadata(metadata, class_list, top):
     ''' add an "id" column to some metadata by ranking frequency
         of the associated "class_id"
 
@@ -45,24 +45,31 @@ def select_metadata(metadata, top):
         metadata: pandas.DataFrame
             required column: class_id
 
-        top: positive int
-            "top" most frequent classes to "id"
+        class_list: None or list(int)
+            list of class ids
+
+        top: None or positive int
+            "top" most frequent class ids
 
 
         Returns
 
         pandas.DataFrame
             subselection of metadata corresponding to "top"
-            most frequent classes
+            most frequent classes in class_list
     '''
-    nr_classes_occurring = metadata.class_id.unique().size
-    if not top or top > nr_classes_occurring:
-        top = nr_classes_occurring
+    if class_list:
+        metadata = metadata[metadata.class_id.isin(class_list)]
 
-    return (metadata.groupby('class_id')
-                    .size()
-                    .rank(method='first', ascending=False)  
-                    .astype(int)
-                    .to_frame(name='id')
-                    .query('id <= @top')
-                    .merge(metadata, left_index=True, right_on='class_id'))
+    # add labels based on frequency of class
+    metadata = (metadata.groupby('class_id')
+                        .size()
+                        .rank(method='first', ascending=False)  
+                        .astype(int)
+                        .to_frame(name='id')
+                        .merge(metadata, left_index=True, right_on='class_id'))
+
+    if top:
+        metadata = metadata.query('id <= @top')
+
+    return metadata

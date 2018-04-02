@@ -56,7 +56,7 @@ def metadata2labelmap(metadata):
 
 
 
-def process_metadata(metadata_path, selected_metadata_path, label_map_path, top):
+def process_metadata(metadata_path, selected_metadata_path, label_map_path, class_list, top):
     ''' ingest metadata, call converter, write label map
 
         Parameters
@@ -70,14 +70,16 @@ def process_metadata(metadata_path, selected_metadata_path, label_map_path, top)
         output_dir: str
             path to output directory
 
-        top: False or int
+        class_list: None or list(int)
+            list of class ids
+
+        top: None or int
             positive int indicating "top" most frequent classes
             to select
-            False to indicate that all classes should be selected
     '''
     metadata = pd.read_csv(metadata_path)
 
-    selected_metadata = metautils.select_metadata(metadata, top)
+    selected_metadata = metautils.select_metadata(metadata, class_list, top)
 
     with open(label_map_path, 'w') as fd:
         # create label map parameters
@@ -110,18 +112,20 @@ if __name__ == "__main__":
                         help='path to data directory')
     parser.add_argument('-t', '--top', 
                         dest='top', 
-                        default=False, 
-                        type=parserutils.bounded_int(lower=0),
+                        type=parserutils.bounded_int(lower=1),
                         help='-t 5 means top 5 labels in terms of frequency \
                               should be included in label map')
+    parser.add_argument('-l', '--list',
+                       dest='class_list',
+                       nargs='+',
+                       type=parserutils.bounded_int(lower=0),
+                       help='list of non-negative class ids')
 
     args, _ = parser.parse_known_args()
-
 
     metadata_path = os.path.join(args.metadata_dir, METADATA_CSV)
     selected_metadata_path = os.path.join(args.metadata_dir, SELECTED_METADATA_CSV)
     label_map_path = os.path.join(args.data_dir, LABEL_MAP_PBTXT)
-
 
     # change working directory to project root directory
     os.chdir(PROJECT_ROOT)
@@ -129,4 +133,5 @@ if __name__ == "__main__":
     process_metadata(metadata_path,
                      selected_metadata_path,
                      label_map_path,
+                     args.class_list,
                      args.top)

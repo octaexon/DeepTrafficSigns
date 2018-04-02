@@ -32,3 +32,4 @@ simulations/*
 !simulations/README.md
 
 /_site
+/src

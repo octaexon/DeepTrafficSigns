@@ -18,9 +18,9 @@ __status__ = 'Development'
 
 def bounded_int(lower=None, upper=None):
     def bounder(arg, lower=lower, upper=upper):
-        ''' converts parsed argument string to integer, checking for positivity
+        ''' converts parsed argument string to integer, checking bounds
 
-            Parameter
+            Parameters
 
             arg: str
                 argument string passed from parser to be converted and checked
@@ -52,6 +52,7 @@ def bounded_int(lower=None, upper=None):
 
         return bounded_int
     return bounder
+
 
 
 def bounded_float(lower=None, upper=None):

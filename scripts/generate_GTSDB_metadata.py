@@ -55,7 +55,7 @@ def generate_metadata(images_path,
                            names=['filename', 'xmin', 'ymin', 
                                   'xmax', 'ymax', 'class_id'])
 
-    # create absolute file paths
+    # create absolute file paths move ppm to jpg
     # TODO: jpg extension is hardcoded here
     metadata.filename = (metadata.filename
                                  .str.replace('ppm', 'jpg')
@@ -73,7 +73,7 @@ def generate_metadata(images_path,
 
     metadata = metadata.merge(image_metadata, on='filename')
 
-    # account for current and previooous scaling
+    # account for current and previous scaling
     metadata[['xmin', 'ymin', 'xmax', 'ymax']] = (
             metadata.apply(lambda x: x[['xmin', 'ymin', 'xmax', 'ymax']] * x['scale'], axis=1)
                     .astype('int64'))
